@@ -14,7 +14,11 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.platform.LocalContext
+import com.tarsil.distribution.utils.WhatsAppHelper
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,6 +43,7 @@ fun CustomerDashboardScreen(
 ) {
     val customers by viewModel.customers.collectAsStateWithLifecycle()
     val customer = customers.find { it.customerId == customerId }
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -260,6 +265,61 @@ fun CustomerDashboardScreen(
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 // Tertiary Action
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            WhatsAppHelper.sendInvoice(context, customer, customer.balanceReceivable)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF206D3E)),
+                        border = BorderStroke(1.dp, Color(0xFF206D3E))
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(imageVector = Icons.Filled.Share, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("WhatsApp", style = Typography.labelMedium)
+                        }
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            com.tarsil.distribution.utils.BluetoothPrinterHelper.printReceipt(
+                                macAddress = "00:11:22:33:44:55", // Placeholder
+                                customerName = customer.businessName,
+                                amountDue = customer.balanceReceivable,
+                                itemsDelivered = 0,
+                                emptiesReturned = 0
+                            )
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(imageVector = Icons.Filled.Receipt, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Print", style = Typography.labelMedium)
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
                 OutlinedButton(
                     onClick = { 
                         viewModel.updateVisitStatus(customerId, "SKIPPED")

@@ -41,7 +41,13 @@ class MainActivity : ComponentActivity() {
                 ) {
                     composable("login") {
                         LoginScreen(
-                            onLoginSuccess = { navController.navigate("itinerary") { popUpTo("login") { inclusive = true } } }
+                            onLoginSuccess = { navController.navigate("dashboard") { popUpTo("login") { inclusive = true } } }
+                        )
+                    }
+                    composable("dashboard") {
+                        UnifiedDashboardScreen(
+                            viewModel = viewModel,
+                            navController = navController
                         )
                     }
                     composable("itinerary") {

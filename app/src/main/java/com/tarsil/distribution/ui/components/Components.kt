@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.NetworkCell
 import androidx.compose.material.icons.filled.Route
@@ -23,7 +24,7 @@ import com.tarsil.distribution.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TarsilTopAppBar(
-    title: String = "FieldOps Pro",
+    title: String = "Tarsil",
     onNavigationClick: (() -> Unit)? = null,
     onSyncClick: () -> Unit,
     showBackButton: Boolean = false
@@ -74,6 +75,7 @@ fun TarsilTopAppBar(
 @Composable
 fun TarsilBottomNavBar(
     currentRoute: String,
+    onNavigateToDashboard: () -> Unit = {},
     onNavigateToItinerary: () -> Unit,
     onNavigateToSync: () -> Unit,
     onNavigateToSettings: () -> Unit
@@ -83,6 +85,24 @@ fun TarsilBottomNavBar(
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         tonalElevation = 8.dp
     ) {
+        NavigationBarItem(
+            selected = currentRoute == "dashboard",
+            onClick = onNavigateToDashboard,
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Dashboard, 
+                    contentDescription = "Dashboard"
+                )
+            },
+            label = { Text("Dashboard", style = Typography.labelMedium) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
         NavigationBarItem(
             selected = currentRoute == "itinerary",
             onClick = onNavigateToItinerary,

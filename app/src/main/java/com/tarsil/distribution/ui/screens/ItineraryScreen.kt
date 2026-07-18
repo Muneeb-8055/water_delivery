@@ -29,13 +29,14 @@ fun ItineraryScreen(viewModel: MainViewModel, navController: NavController) {
     Scaffold(
         topBar = {
             TarsilTopAppBar(
-                title = "FieldOps Pro",
+                title = "Tarsil",
                 onSyncClick = { /*TODO*/ }
             )
         },
         bottomBar = {
             TarsilBottomNavBar(
                 currentRoute = "itinerary",
+                onNavigateToDashboard = { navController.navigate("dashboard") },
                 onNavigateToItinerary = { },
                 onNavigateToSync = { },
                 onNavigateToSettings = { navController.navigate("profile") } // Let's map settings to profile for now based on UI designs
