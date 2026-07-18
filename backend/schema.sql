@@ -6,6 +6,20 @@ CREATE TABLE tenants (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE roles_and_rights (
+    role_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+    role_name VARCHAR(100) NOT NULL,
+    allowed_rights JSONB DEFAULT '[]'::jsonb
+);
+
+CREATE TABLE users (
+    user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+    username VARCHAR(255) NOT NULL,
+    role_id UUID REFERENCES roles_and_rights(role_id)
+);
+
 CREATE TABLE customers (
     customer_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
@@ -26,12 +40,13 @@ CREATE TABLE inventory_items (
     title VARCHAR(255) NOT NULL,
     classification VARCHAR(50) NOT NULL,
     base_rate NUMERIC(10, 2) NOT NULL,
-    stock_level INT DEFAULT 0,
+    current_stock_warehouse INT DEFAULT 0,
+    recipe_configuration JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE transaction_ledger (
-    local_uuid UUID PRIMARY KEY, -- Client generated UUID
+    local_uuid UUID PRIMARY KEY,
     tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
     customer_id UUID NOT NULL REFERENCES customers(customer_id),
     record_classification VARCHAR(50) NOT NULL, -- 'SALE', 'RECOVERY', 'SKIP'
