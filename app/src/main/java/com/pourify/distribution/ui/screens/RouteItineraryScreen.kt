@@ -20,17 +20,26 @@ import com.pourify.distribution.ui.MainViewModel
 import com.pourify.distribution.ui.components.PourifyBottomNavBar
 import com.pourify.distribution.ui.components.PourifyTopAppBar
 import com.pourify.distribution.ui.theme.Typography
+import androidx.compose.ui.platform.LocalContext
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.pourify.distribution.worker.SyncWorker
+
 
 @Composable
 fun RouteItineraryScreen(viewModel: MainViewModel, navController: NavController) {
     val customers by viewModel.customers.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) }
 
     Scaffold(
         topBar = {
             PourifyTopAppBar(
                 title = "Pourify",
-                onSyncClick = { /*TODO*/ }
+                onSyncClick = { 
+                    val workRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
+                    WorkManager.getInstance(context).enqueue(workRequest)
+                }
             )
         },
         bottomBar = {
@@ -150,10 +159,10 @@ fun RouteItem(customer: CustomerEntity, onClick: () -> Unit) {
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
             Box(
                 modifier = Modifier
-                    .width(4.dp)
+                    .width(8.dp)
                     .fillMaxHeight()
                     .background(indicatorColor)
             )
