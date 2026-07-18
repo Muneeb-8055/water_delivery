@@ -14,6 +14,10 @@ class AppRepository(
     suspend fun insertCustomers(customers: List<CustomerEntity>) {
         customerDao.insertAll(customers)
     }
+    
+    suspend fun deleteAllCustomers() {
+        customerDao.deleteAllCustomers()
+    }
 
     suspend fun updateCustomer(customer: CustomerEntity) {
         customerDao.updateCustomer(customer)
@@ -29,5 +33,13 @@ class AppRepository(
 
     suspend fun insertTransaction(transaction: TransactionEntity) {
         transactionDao.insertTransaction(transaction)
+    }
+    
+    suspend fun getPendingTransactions(): List<TransactionEntity> {
+        return transactionDao.getPendingTransactions()
+    }
+    
+    suspend fun updateTransactions(transactions: List<TransactionEntity>) {
+        transactionDao.updateTransactions(transactions)
     }
 }

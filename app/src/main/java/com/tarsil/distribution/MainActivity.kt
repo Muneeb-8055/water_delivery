@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = "login"
+                    startDestination = "itinerary"
                 ) {
                     composable("login") {
                         LoginScreen(
@@ -51,14 +51,14 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("itinerary") {
-                        ItineraryScreen(
+                        RouteItineraryScreen(
                             viewModel = viewModel,
                             navController = navController
                         )
                     }
                     composable("customer_dashboard/{customerId}") { backStackEntry ->
                         val customerId = backStackEntry.arguments?.getString("customerId") ?: ""
-                        CustomerDashboardScreen(
+                        CustomerDetailScreen(
                             customerId = customerId,
                             viewModel = viewModel,
                             navController = navController

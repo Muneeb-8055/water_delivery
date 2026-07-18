@@ -18,7 +18,7 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.ui.platform.LocalContext
-import com.tarsil.distribution.utils.WhatsAppHelper
+import com.tarsil.distribution.utils.WhatsAppDispatcher
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,7 +36,7 @@ import com.tarsil.distribution.ui.components.TarsilTopAppBar
 import com.tarsil.distribution.ui.theme.Typography
 
 @Composable
-fun CustomerDashboardScreen(
+fun CustomerDetailScreen(
     customerId: String,
     viewModel: MainViewModel,
     navController: NavController
@@ -230,7 +230,7 @@ fun CustomerDashboardScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(imageVector = Icons.Filled.ShoppingCart, contentDescription = null)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text("Log Sale", style = Typography.headlineSmall)
+                            Text("Log Delivery", style = Typography.headlineSmall)
                         }
                         Icon(imageVector = Icons.Filled.ArrowForward, contentDescription = null)
                     }
@@ -256,7 +256,7 @@ fun CustomerDashboardScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(imageVector = Icons.Filled.Payments, contentDescription = null)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text("Record Payment", style = Typography.headlineSmall)
+                            Text("Log Payment Recovery", style = Typography.headlineSmall)
                         }
                         Icon(imageVector = Icons.Filled.Add, contentDescription = null)
                     }
@@ -271,7 +271,7 @@ fun CustomerDashboardScreen(
                 ) {
                     OutlinedButton(
                         onClick = {
-                            WhatsAppHelper.sendInvoice(context, customer, customer.balanceReceivable)
+                            WhatsAppDispatcher.sendInvoiceText(context, customer.contactPhone, customer.balanceReceivable)
                         },
                         modifier = Modifier
                             .weight(1f)
@@ -286,18 +286,18 @@ fun CustomerDashboardScreen(
                         ) {
                             Icon(imageVector = Icons.Filled.Share, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("WhatsApp", style = Typography.labelMedium)
+                            Text("Share Invoice via WhatsApp", style = Typography.labelMedium)
                         }
                     }
 
                     OutlinedButton(
                         onClick = {
-                            com.tarsil.distribution.utils.BluetoothPrinterHelper.printReceipt(
+                            com.tarsil.distribution.utils.BluetoothPrinterService.printInvoice(
                                 macAddress = "00:11:22:33:44:55", // Placeholder
                                 customerName = customer.businessName,
-                                amountDue = customer.balanceReceivable,
-                                itemsDelivered = 0,
-                                emptiesReturned = 0
+                                total = customer.balanceReceivable, collected = 0.0,
+                                items = 0,
+                                emptiesBalance = customer.companyOwnedBottles
                             )
                         },
                         modifier = Modifier
@@ -338,7 +338,7 @@ fun CustomerDashboardScreen(
                     ) {
                         Icon(imageVector = Icons.Filled.Block, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Skip Visit", style = Typography.bodyLarge)
+                        Text("Log Skip (No Response)", style = Typography.bodyLarge)
                     }
                 }
             }

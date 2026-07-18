@@ -22,7 +22,7 @@ import com.tarsil.distribution.ui.components.TarsilTopAppBar
 import com.tarsil.distribution.ui.theme.Typography
 
 @Composable
-fun ItineraryScreen(viewModel: MainViewModel, navController: NavController) {
+fun RouteItineraryScreen(viewModel: MainViewModel, navController: NavController) {
     val customers by viewModel.customers.collectAsStateWithLifecycle()
     var selectedTab by remember { mutableStateOf(0) }
 
@@ -181,7 +181,7 @@ fun RouteItem(customer: CustomerEntity, onClick: () -> Unit) {
                     Text("BALANCE", style = Typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = opacity))
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "PKR ${customer.balanceReceivable.toInt()}",
+                        text = "Balance: PKR ${customer.balanceReceivable.toInt()}",
                         style = Typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = opacity)
                     )

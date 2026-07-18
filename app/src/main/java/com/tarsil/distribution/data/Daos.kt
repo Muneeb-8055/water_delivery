@@ -20,6 +20,8 @@ interface CustomerDao {
 
     @Update
     suspend fun updateCustomer(customer: CustomerEntity)
+    @Query("DELETE FROM customers")
+    suspend fun deleteAllCustomers()
 }
 
 @Dao
@@ -38,9 +40,13 @@ interface InventoryDao {
 interface TransactionDao {
     @Query("SELECT * FROM transaction_ledger ORDER BY epochTimestamp DESC")
     fun getAllTransactions(): Flow<List<TransactionEntity>>
+    @Query("SELECT * FROM transaction_ledger WHERE syncState = 'PENDING'")
+    suspend fun getPendingTransactions(): List<TransactionEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: TransactionEntity)
+    @Update
+    suspend fun updateTransactions(transactions: List<TransactionEntity>)
 }
 
 @Dao

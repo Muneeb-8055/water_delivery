@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarsil Unified Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            font-weight: 300;
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        .dashboard-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 30px;
+            width: 250px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card h2 {
+            margin: 0 0 15px;
+            color: #95a5a6;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .card.revenue .value {
+            color: #27ae60;
+        }
+        .card.visits .value {
+            color: #2980b9;
+        }
+        .visit-breakdown {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        .verified {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .unverified {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Tarsil ERP Dashboard</h1>
+        <p>Back-Office Summary</p>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Total Customers -->
+        <div class="card">
+            <h2>Total Customers</h2>
+            <div class="value" id="total-customers">-</div>
+        </div>
+
+        <!-- Total Receivable Balance -->
+        <div class="card revenue">
+            <h2>Receivable Balance</h2>
+            <div class="value" id="total-receivable">-</div>
+        </div>
+
+        <!-- Today's Visits -->
+        <div class="card visits">
+            <h2>Today's Visits</h2>
+            <div class="value" id="total-visits">-</div>
+            <div class="visit-breakdown">
+                <div><span class="verified" id="verified-visits">-</span> Verified</div>
+                <div><span class="unverified" id="unverified-visits">-</span> Unverified</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dummy tenant id for demonstration
+        const tenantId = 'b1234567-89ab-cdef-0123-456789abcdef';
+        
+        async function fetchSummary() {
+            try {
+                const response = await fetch(`/api/v1/dashboard/summary?tenant_id=${tenantId}`);
+                const json = await response.json();
+                
+                if (json.success) {
+                    const data = json.data;
+                    document.getElementById('total-customers').innerText = data.total_customers.toLocaleString();
+                    document.getElementById('total-receivable').innerText = 'PKR ' + data.total_receivable.toLocaleString();
+                    
+                    const totalVisits = data.verified_visits + data.unverified_visits;
+                    document.getElementById('total-visits').innerText = totalVisits.toLocaleString();
+                    document.getElementById('verified-visits').innerText = data.verified_visits.toLocaleString();
+                    document.getElementById('unverified-visits').innerText = data.unverified_visits.toLocaleString();
+                } else {
+                    console.error("Error fetching summary:", json.error);
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+            }
+        }
+
+        // Fetch initially and then set an interval to refresh
+        fetchSummary();
+        setInterval(fetchSummary, 60000); // refresh every minute
+    </script>
+</body>
+</html>
