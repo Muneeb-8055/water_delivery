@@ -1,4 +1,4 @@
-package com.example.data
+package com.tarsil.distribution.data
 
 import kotlinx.coroutines.flow.Flow
 

@@ -1,4 +1,4 @@
-package com.example.data
+package com.tarsil.distribution.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -37,6 +37,25 @@ data class TransactionEntity(
     val amountCollected: Double,
     val itemUnitsDelivered: Int,
     val packageAssetsRecovered: Int,
+    val epochTimestamp: Long,
+    val syncState: String // 'PENDING', 'SYNCED'
+)
+
+@Entity(tableName = "users")
+data class UserEntity(
+    @PrimaryKey val userId: String,
+    val username: String,
+    val fullName: String,
+    val role: String,
+    val activeRouteId: String?
+)
+
+@Entity(tableName = "gps_track_logs")
+data class GpsTrackLogEntity(
+    @PrimaryKey val localUuid: String,
+    val driverId: String,
+    val latitude: Double,
+    val longitude: Double,
     val epochTimestamp: Long,
     val syncState: String // 'PENDING', 'SYNCED'
 )

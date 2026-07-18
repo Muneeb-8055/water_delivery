@@ -1,12 +1,12 @@
-package com.example.ui
+package com.tarsil.distribution.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.data.AppRepository
-import com.example.data.CustomerEntity
-import com.example.data.InventoryItemEntity
-import com.example.data.TransactionEntity
+import com.tarsil.distribution.data.AppRepository
+import com.tarsil.distribution.data.CustomerEntity
+import com.tarsil.distribution.data.InventoryItemEntity
+import com.tarsil.distribution.data.TransactionEntity
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

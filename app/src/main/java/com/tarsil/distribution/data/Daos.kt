@@ -1,4 +1,4 @@
-package com.example.data
+package com.tarsil.distribution.data
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -41,4 +41,25 @@ interface TransactionDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: TransactionEntity)
+}
+
+@Dao
+interface UserDao {
+    @Query("SELECT * FROM users LIMIT 1")
+    suspend fun getCurrentUser(): UserEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUser(user: UserEntity)
+}
+
+@Dao
+interface GpsTrackLogDao {
+    @Query("SELECT * FROM gps_track_logs WHERE syncState = 'PENDING'")
+    suspend fun getPendingLogs(): List<GpsTrackLogEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLog(log: GpsTrackLogEntity)
+    
+    @Update
+    suspend fun updateLog(log: GpsTrackLogEntity)
 }

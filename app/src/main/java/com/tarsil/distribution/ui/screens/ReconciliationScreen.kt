@@ -1,4 +1,4 @@
-package com.example.ui.screens
+package com.tarsil.distribution.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -22,8 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.ui.components.TarsilTopAppBar
-import com.example.ui.theme.Typography
+import com.tarsil.distribution.ui.components.TarsilTopAppBar
+import com.tarsil.distribution.ui.theme.Typography
 
 @Composable
 fun ReconciliationScreen(navController: NavController) {

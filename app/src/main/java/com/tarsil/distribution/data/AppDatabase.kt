@@ -1,15 +1,23 @@
-package com.example.data
+package com.tarsil.distribution.data
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [CustomerEntity::class, InventoryItemEntity::class, TransactionEntity::class], version = 1, exportSchema = false)
+@Database(entities = [
+    CustomerEntity::class, 
+    InventoryItemEntity::class, 
+    TransactionEntity::class, 
+    UserEntity::class, 
+    GpsTrackLogEntity::class
+], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun customerDao(): CustomerDao
     abstract fun inventoryDao(): InventoryDao
     abstract fun transactionDao(): TransactionDao
+    abstract fun userDao(): UserDao
+    abstract fun gpsTrackLogDao(): GpsTrackLogDao
 
     companion object {
         @Volatile

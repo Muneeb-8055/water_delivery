@@ -1,4 +1,4 @@
-package com.example.ui.screens
+package com.tarsil.distribution.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -26,10 +26,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.ui.MainViewModel
-import com.example.ui.components.TarsilBottomNavBar
-import com.example.ui.components.TarsilTopAppBar
-import com.example.ui.theme.Typography
+import com.tarsil.distribution.ui.MainViewModel
+import com.tarsil.distribution.ui.components.TarsilBottomNavBar
+import com.tarsil.distribution.ui.components.TarsilTopAppBar
+import com.tarsil.distribution.ui.theme.Typography
 
 @Composable
 fun CustomerDashboardScreen(

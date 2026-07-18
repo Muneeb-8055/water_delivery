@@ -1,4 +1,4 @@
-package com.example.ui.screens
+package com.tarsil.distribution.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,7 +24,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.Typography
+import com.tarsil.distribution.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

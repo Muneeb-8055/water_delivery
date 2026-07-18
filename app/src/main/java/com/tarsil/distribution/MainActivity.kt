@@ -1,4 +1,4 @@
-package com.example
+package com.tarsil.distribution
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,12 +12,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.data.AppDatabase
-import com.example.data.AppRepository
-import com.example.ui.MainViewModel
-import com.example.ui.MainViewModelFactory
-import com.example.ui.screens.*
-import com.example.ui.theme.MyApplicationTheme
+import com.tarsil.distribution.data.AppDatabase
+import com.tarsil.distribution.data.AppRepository
+import com.tarsil.distribution.ui.MainViewModel
+import com.tarsil.distribution.ui.MainViewModelFactory
+import com.tarsil.distribution.ui.screens.*
+import com.tarsil.distribution.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
