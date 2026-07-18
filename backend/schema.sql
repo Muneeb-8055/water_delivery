@@ -67,3 +67,13 @@ CREATE TABLE gps_track_logs (
     longitude DOUBLE PRECISION NOT NULL,
     epoch_timestamp BIGINT NOT NULL
 );
+
+CREATE TABLE delivery_challan (
+    challan_id VARCHAR(255) PRIMARY KEY,
+    tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+    customer_id UUID NOT NULL REFERENCES customers(customer_id),
+    transaction_uuid UUID REFERENCES transaction_ledger(local_uuid),
+    pdf_file_path VARCHAR(500),
+    is_paid BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
