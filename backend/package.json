@@ -1,7 +1,7 @@
 {
-  "name": "tarsil-backend",
+  "name": "pourify-backend",
   "version": "1.0.0",
-  "description": "Tarsil ERP Backend",
+  "description": "Pourify ERP Backend",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"

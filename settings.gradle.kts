@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Tarsil"
+rootProject.name = "Pourify"
 
 include(":app")

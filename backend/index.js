@@ -255,5 +255,5 @@ app.get('/api/v1/dashboard/summary', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Tarsil Backend listening on port ${PORT}`);
+    console.log(`Pourify Backend listening on port ${PORT}`);
 });

@@ -1,0 +1,85 @@
+--- app/src/main/java/com/pourify/distribution/ui/screens/CustomerDetailScreen.kt
++++ app/src/main/java/com/pourify/distribution/ui/screens/CustomerDetailScreen.kt
+@@ -16,10 +16,12 @@
+ import androidx.compose.material.icons.filled.LocationOn
+ import androidx.compose.material.icons.filled.Payments
+ import androidx.compose.material.icons.filled.Receipt
+ import androidx.compose.material.icons.filled.ShoppingCart
+ import androidx.compose.material.icons.filled.Share
++import androidx.compose.material.icons.filled.PinDrop
+ import androidx.compose.ui.platform.LocalContext
+ import com.pourify.distribution.utils.WhatsAppDispatcher
+ import androidx.compose.material3.*
+ import androidx.compose.runtime.*
+ import androidx.compose.ui.Alignment
+@@ -35,16 +37,39 @@
+ import com.pourify.distribution.ui.theme.Typography
++import android.Manifest
++import android.content.pm.PackageManager
++import androidx.activity.compose.rememberLauncherForActivityResult
++import androidx.activity.result.contract.ActivityResultContracts
++import androidx.core.content.ContextCompat
++import com.google.android.gms.location.LocationServices
+ 
+ @Composable
+ fun CustomerDetailScreen(
+     customerId: String,
+     viewModel: MainViewModel,
+     navController: NavController
+ ) {
+     val customers by viewModel.customers.collectAsStateWithLifecycle()
+     val customer = customers.find { it.customerId == customerId }
+     val context = LocalContext.current
++    
++    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
++    var locationText by remember { mutableStateOf("Lat: ${customer?.geoLatitude ?: 0.0}, Lng: ${customer?.geoLongitude ?: 0.0}") }
++
++    val requestPermissionLauncher = rememberLauncherForActivityResult(
++        ActivityResultContracts.RequestMultiplePermissions()
++    ) { permissions ->
++        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
++            try {
++                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
++                    if (location != null) {
++                        viewModel.updateCustomerLocation(customerId, location.latitude, location.longitude)
++                        locationText = "Lat: ${location.latitude}, Lng: ${location.longitude}"
++                    }
++                }
++            } catch (e: SecurityException) {
++                e.printStackTrace()
++            }
++        }
++    }
+ 
+     Scaffold(
+         topBar = {
+@@ -131,8 +156,23 @@
+                             ) {
+-                                Icon(
+-                                    imageVector = Icons.Filled.LocationOn,
+-                                    contentDescription = "Map Placeholder",
+-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+-                                )
++                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
++                                    Text(text = locationText, style = Typography.bodySmall)
++                                    Spacer(modifier = Modifier.height(4.dp))
++                                    OutlinedButton(
++                                        onClick = {
++                                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
++                                                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
++                                                    if (location != null) {
++                                                        viewModel.updateCustomerLocation(customerId, location.latitude, location.longitude)
++                                                        locationText = "Lat: ${location.latitude}, Lng: ${location.longitude}"
++                                                    }
++                                                }
++                                            } else {
++                                                requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
++                                            }
++                                        }
++                                    ) {
++                                        Icon(Icons.Filled.PinDrop, contentDescription = "Pin Location")
++                                        Spacer(modifier = Modifier.width(4.dp))
++                                        Text("Pin Location")
++                                    }
++                                }
+                             }
