@@ -40,7 +40,7 @@ fun UnifiedDashboardScreen(viewModel: MainViewModel, navController: NavControlle
             PourifyBottomNavBar(
                 currentRoute = "dashboard",
                 onNavigateToItinerary = { navController.navigate("itinerary") },
-                onNavigateToSync = { },
+                onNavigateToSync = { navController.navigate("reconciliation") },
                 onNavigateToSettings = { navController.navigate("profile") }
             )
         }
@@ -76,6 +76,34 @@ fun UnifiedDashboardScreen(viewModel: MainViewModel, navController: NavControlle
                         icon = Icons.Filled.Payments,
                         modifier = Modifier.weight(1f)
                     )
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+                    shape = RoundedCornerShape(24.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Box(modifier = Modifier.fillMaxSize().background(Color(0xFFE2E8F0)))
+                        Icon(
+                            imageVector = Icons.Filled.LocationOn,
+                            contentDescription = "Map Marker",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.align(Alignment.Center).size(48.dp)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(16.dp)
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text("Live Area Map", style = Typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+                        }
+                    }
                 }
             }
 

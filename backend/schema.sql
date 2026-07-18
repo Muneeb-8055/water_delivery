@@ -9,6 +9,7 @@ CREATE TABLE tenants (
 CREATE TABLE roles_and_rights (
     role_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+    driver_id UUID REFERENCES users(user_id),
     role_name VARCHAR(100) NOT NULL,
     allowed_rights JSONB DEFAULT '[]'::jsonb
 );
@@ -16,6 +17,7 @@ CREATE TABLE roles_and_rights (
 CREATE TABLE users (
     user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+    driver_id UUID REFERENCES users(user_id),
     username VARCHAR(255) NOT NULL,
     role_id UUID REFERENCES roles_and_rights(role_id)
 );
@@ -23,6 +25,7 @@ CREATE TABLE users (
 CREATE TABLE customers (
     customer_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+    driver_id UUID REFERENCES users(user_id),
     business_name VARCHAR(255) NOT NULL,
     contact_phone VARCHAR(50),
     geo_latitude DOUBLE PRECISION,
@@ -37,6 +40,7 @@ CREATE TABLE customers (
 CREATE TABLE inventory_items (
     item_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+    driver_id UUID REFERENCES users(user_id),
     title VARCHAR(255) NOT NULL,
     classification VARCHAR(50) NOT NULL,
     base_rate NUMERIC(10, 2) NOT NULL,
@@ -48,6 +52,7 @@ CREATE TABLE inventory_items (
 CREATE TABLE transaction_ledger (
     local_uuid UUID PRIMARY KEY,
     tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+    driver_id UUID REFERENCES users(user_id),
     customer_id UUID NOT NULL REFERENCES customers(customer_id),
     record_classification VARCHAR(50) NOT NULL, -- 'SALE', 'RECOVERY', 'SKIP'
     amount_charged NUMERIC(15, 2) DEFAULT 0,
@@ -62,6 +67,7 @@ CREATE TABLE transaction_ledger (
 CREATE TABLE gps_track_logs (
     local_uuid UUID PRIMARY KEY,
     tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+    driver_id UUID REFERENCES users(user_id),
     driver_id UUID NOT NULL,
     latitude DOUBLE PRECISION NOT NULL,
     longitude DOUBLE PRECISION NOT NULL,
@@ -71,6 +77,7 @@ CREATE TABLE gps_track_logs (
 CREATE TABLE delivery_challan (
     challan_id VARCHAR(255) PRIMARY KEY,
     tenant_id UUID NOT NULL REFERENCES tenants(tenant_id),
+    driver_id UUID REFERENCES users(user_id),
     customer_id UUID NOT NULL REFERENCES customers(customer_id),
     transaction_uuid UUID REFERENCES transaction_ledger(local_uuid),
     pdf_file_path VARCHAR(500),

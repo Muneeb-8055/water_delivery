@@ -1,11 +1,16 @@
 package com.pourify.distribution.ui.screens
 
+import java.util.UUID
+
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +36,7 @@ fun RouteItineraryScreen(viewModel: MainViewModel, navController: NavController)
     val customers by viewModel.customers.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) }
+    var showAddCustomerDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -42,12 +48,22 @@ fun RouteItineraryScreen(viewModel: MainViewModel, navController: NavController)
                 }
             )
         },
+
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddCustomerDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Add Customer")
+            }
+        },
         bottomBar = {
             PourifyBottomNavBar(
                 currentRoute = "itinerary",
                 onNavigateToDashboard = { navController.navigate("dashboard") },
                 onNavigateToItinerary = { },
-                onNavigateToSync = { },
+                onNavigateToSync = { navController.navigate("reconciliation") },
                 onNavigateToSettings = { navController.navigate("profile") } // Let's map settings to profile for now based on UI designs
             )
         }
@@ -110,6 +126,70 @@ fun RouteItineraryScreen(viewModel: MainViewModel, navController: NavController)
             }
         }
     }
+
+        if (showAddCustomerDialog) {
+            var businessName by remember { mutableStateOf("") }
+            var phone by remember { mutableStateOf("") }
+            var balance by remember { mutableStateOf("") }
+            
+            AlertDialog(
+                onDismissRequest = { showAddCustomerDialog = false },
+                title = { Text("Add New Customer") },
+                text = {
+                    Column {
+                        OutlinedTextField(
+                            value = businessName,
+                            onValueChange = { businessName = it },
+                            label = { Text("Business Name") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = phone,
+                            onValueChange = { phone = it },
+                            label = { Text("Phone Number") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = balance,
+                            onValueChange = { balance = it },
+                            label = { Text("Starting Balance") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val bal = balance.toDoubleOrNull() ?: 0.0
+                        if (businessName.isNotBlank()) {
+                            viewModel.insertCustomer(
+                                CustomerEntity(
+                                    customerId = UUID.randomUUID().toString(),
+                                    businessName = businessName,
+                                    contactPhone = phone,
+                                    geoLatitude = 0.0,
+                                    geoLongitude = 0.0,
+                                    cachedHistoricalRate = 0.0,
+                                    balanceReceivable = bal,
+                                    companyOwnedBottles = 0,
+                                    depositBackedBottles = 0,
+                                    visitStatus = "SCHEDULED"
+                                )
+                            )
+                            showAddCustomerDialog = false
+                        }
+                    }) {
+                        Text("Add")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showAddCustomerDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
 }
 
 @Composable

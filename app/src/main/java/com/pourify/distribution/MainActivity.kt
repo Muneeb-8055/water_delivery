@@ -72,6 +72,22 @@ class MainActivity : ComponentActivity() {
                             navController = navController
                         )
                     }
+                    
+                    
+                    composable("agent_map") {
+                        AgentMapScreen(
+                            viewModel = viewModel,
+                            navController = navController
+                        )
+                    }
+
+                    composable("manage_customers") {
+                        ManageCustomersScreen(
+                            viewModel = viewModel,
+                            navController = navController
+                        )
+                    }
+
                     composable("settings") {
                         SettingsScreen(navController = navController)
                     }

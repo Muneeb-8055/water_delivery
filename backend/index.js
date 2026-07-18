@@ -4,7 +4,6 @@ const { Pool } = require('pg');
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
-app.use(express.static(\public\));
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL
@@ -114,12 +113,12 @@ app.post('/api/v1/mobile/itinerary/reconcile', async (req, res) => {
                 // Insert into Ledger
                 await client.query(`
                     INSERT INTO transaction_ledger (
-                        local_uuid, tenant_id, customer_id, record_classification, amount_charged,
+                        local_uuid, tenant_id, driver_id, customer_id, record_classification, amount_charged,
                         amount_collected, item_units_delivered, package_assets_recovered,
                         epoch_timestamp, sync_state, proximity_status
-                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'SYNCED', $10)
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'SYNCED', $11)
                 `, [
-                    tx.localUuid, tenant_id, tx.customerId, tx.recordClassification,
+                    tx.localUuid, tenant_id, driver_id, tx.customerId, tx.recordClassification,
                     tx.amountCharged, tx.amountCollected, tx.itemUnitsDelivered,
                     tx.packageAssetsRecovered, tx.epochTimestamp, proximityStatus
                 ]);
@@ -250,6 +249,103 @@ app.get('/api/v1/dashboard/summary', async (req, res) => {
         });
     } catch (err) {
         console.error('Dashboard Summary Error:', err);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+
+
+// --- MANAGER PORTAL ENDPOINTS ---
+
+// Manager Login Endpoint
+app.post('/api/v1/manager/login', (req, res) => {
+    const { username, password } = req.body;
+    // For demo purposes, we are using hardcoded credentials for the manager.
+    // In production, you would hash the password and check against the users table.
+    if (username === 'admin' && password === 'admin') {
+        // Return the demo tenant_id
+        res.json({ success: true, tenant_id: 'b1234567-89ab-cdef-0123-456789abcdef' });
+    } else {
+        res.status(401).json({ success: false, error: 'Invalid credentials' });
+    }
+});
+
+
+// Get agents and their progress
+app.get('/api/v1/manager/agents', async (req, res) => {
+    const { tenant_id } = req.query;
+    if (!tenant_id) return res.status(400).json({ success: false, error: 'Missing tenant_id' });
+    
+    try {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const epochToday = todayStart.getTime();
+
+        const agentsRes = await pool.query(`
+            SELECT u.user_id, u.username, 
+                   COUNT(t.local_uuid) as deliveries_today,
+                   SUM(t.amount_collected) as cash_collected_today
+            FROM users u
+            LEFT JOIN transaction_ledger t ON u.user_id = t.driver_id AND t.epoch_timestamp >= $2
+            WHERE u.tenant_id = $1 AND u.role_id IS NULL -- Simplified for agents without specific roles
+            GROUP BY u.user_id, u.username
+        `, [tenant_id, epochToday]);
+        
+        res.json({ success: true, data: agentsRes.rows });
+    } catch (err) {
+        console.error('Agents progress error:', err);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+
+// Create agent
+app.post('/api/v1/manager/agents', async (req, res) => {
+    const { tenant_id, username, password_hash } = req.body;
+    if (!tenant_id || !username) return res.status(400).json({ success: false, error: 'Missing params' });
+    
+    try {
+        const insertRes = await pool.query(`
+            INSERT INTO users (tenant_id, username) VALUES ($1, $2) RETURNING user_id
+        `, [tenant_id, username]);
+        res.json({ success: true, user_id: insertRes.rows[0].user_id });
+    } catch (err) {
+        console.error('Create agent error:', err);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+
+// Get customers for combined invoice
+app.get('/api/v1/manager/customers', async (req, res) => {
+    const { tenant_id } = req.query;
+    if (!tenant_id) return res.status(400).json({ success: false, error: 'Missing tenant_id' });
+    
+    try {
+        const customersRes = await pool.query(`
+            SELECT customer_id, business_name, balance_receivable, contact_phone
+            FROM customers WHERE tenant_id = $1
+        `, [tenant_id]);
+        res.json({ success: true, data: customersRes.rows });
+    } catch (err) {
+        console.error('Get customers error:', err);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+
+// Get customer transactions
+app.get('/api/v1/manager/customers/:customer_id/transactions', async (req, res) => {
+    const { tenant_id } = req.query;
+    const { customer_id } = req.params;
+    
+    try {
+        const txRes = await pool.query(`
+            SELECT t.*, u.username as driver_name
+            FROM transaction_ledger t
+            LEFT JOIN users u ON t.driver_id = u.user_id
+            WHERE t.tenant_id = $1 AND t.customer_id = $2
+            ORDER BY t.epoch_timestamp DESC
+        `, [tenant_id, customer_id]);
+        res.json({ success: true, data: txRes.rows });
+    } catch (err) {
+        console.error('Get transactions error:', err);
         res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });

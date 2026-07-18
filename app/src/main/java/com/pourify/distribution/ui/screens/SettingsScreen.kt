@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
@@ -12,6 +14,7 @@ import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,7 +43,7 @@ fun SettingsScreen(navController: NavController) {
             PourifyBottomNavBar(
                 currentRoute = "settings",
                 onNavigateToItinerary = { navController.navigate("itinerary") },
-                onNavigateToSync = { },
+                onNavigateToSync = { navController.navigate("reconciliation") },
                 onNavigateToSettings = { }
             )
         }
@@ -50,7 +53,8 @@ fun SettingsScreen(navController: NavController) {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Column {
@@ -192,6 +196,19 @@ fun SettingsScreen(navController: NavController) {
                         }
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            OutlinedButton(
+                onClick = { navController.navigate("login") { popUpTo(0) } },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.error),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
+                Icon(imageVector = Icons.Filled.Logout, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Logout", style = Typography.labelMedium)
             }
         }
     }

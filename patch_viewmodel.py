@@ -1,25 +1,16 @@
-import re
-
 with open("app/src/main/java/com/pourify/distribution/ui/MainViewModel.kt", "r") as f:
     content = f.read()
 
-imports = """import com.pourify.distribution.data.DeliveryChallanEntity
-"""
-content = re.sub(r'import com.pourify.distribution.data.TransactionEntity\n', 'import com.pourify.distribution.data.TransactionEntity\n' + imports, content)
-
-new_methods = """
-    fun insertChallan(challan: DeliveryChallanEntity) {
+func = """
+    fun insertCustomer(customer: CustomerEntity) {
         viewModelScope.launch {
-            repository.insertChallan(challan)
+            repository.insertCustomers(listOf(customer))
         }
     }
-
-    suspend fun getUnpaidChallans(customerId: String): List<DeliveryChallanEntity> {
-        return repository.getUnpaidChallans(customerId)
-    }
 """
 
-content = content.replace("fun logTransaction(transaction: TransactionEntity) {", new_methods + "\n    fun logTransaction(transaction: TransactionEntity) {")
-
-with open("app/src/main/java/com/pourify/distribution/ui/MainViewModel.kt", "w") as f:
-    f.write(content)
+if "fun insertCustomer(" not in content:
+    content = content.replace("fun updateCustomerLocation(", func + "\n    fun updateCustomerLocation(")
+    with open("app/src/main/java/com/pourify/distribution/ui/MainViewModel.kt", "w") as f:
+        f.write(content)
+        print("Patched MainViewModel")

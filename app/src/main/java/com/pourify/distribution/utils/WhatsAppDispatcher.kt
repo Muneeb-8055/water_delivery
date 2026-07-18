@@ -14,10 +14,10 @@ object WhatsAppDispatcher {
         val encodedMessage = URLEncoder.encode(message, "UTF-8")
         
         val uri = Uri.parse("whatsapp://send?phone=$number&text=$encodedMessage")
-        val intent = Intent(Intent.ACTION_VIEW, uri)
+        val intent = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, message) }
         
         try {
-            context.startActivity(intent)
+            context.startActivity(Intent.createChooser(intent, "Share Invoice via"))
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -41,13 +41,13 @@ object WhatsAppDispatcher {
             type = "application/pdf"
             putExtra(Intent.EXTRA_STREAM, uri)
             putExtra("jid", "$number@s.whatsapp.net") // Direct specific number
-            setPackage("com.whatsapp")
+            // setPackage("com.whatsapp")
             putExtra(Intent.EXTRA_TEXT, message)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
         try {
-            context.startActivity(intent)
+            context.startActivity(Intent.createChooser(intent, "Share Invoice via"))
         } catch (e: Exception) {
             e.printStackTrace()
         }

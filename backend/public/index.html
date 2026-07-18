@@ -4,140 +4,495 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pourify Unified Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            teal: '#14B8A6',
+                            blue: '#0EA5E9',
+                            dark: '#0F172A',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .header h1 {
-            color: #2c3e50;
-            font-weight: 300;
-            margin: 0;
-            font-size: 2.5rem;
-        }
-        .header p {
-            color: #7f8c8d;
-            font-size: 1.1rem;
-        }
-        .dashboard-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .card {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            padding: 30px;
-            width: 250px;
-            text-align: center;
+        body { font-family: 'Space Grotesk', sans-serif; background-color: #f8fafc; }
+        .metric-card {
+            background: white; border-radius: 1rem; padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: 1px solid #e2e8f0;
             transition: transform 0.2s;
         }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        .card h2 {
-            margin: 0 0 15px;
-            color: #95a5a6;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .card .value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .card.revenue .value {
-            color: #27ae60;
-        }
-        .card.visits .value {
-            color: #2980b9;
-        }
-        .visit-breakdown {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: #7f8c8d;
-        }
-        .verified {
-            color: #27ae60;
-            font-weight: bold;
-        }
-        .unverified {
-            color: #e74c3c;
-            font-weight: bold;
-        }
+        .metric-card:hover { transform: translateY(-2px); }
+        .tab-btn.active { border-bottom-color: #14B8A6; color: #14B8A6; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Pourify ERP Dashboard</h1>
-        <p>Back-Office Summary</p>
+    <!-- Login View -->
+    <div id="view-login" class="min-h-screen flex items-center justify-center bg-slate-100">
+        <div class="bg-white p-8 rounded-lg shadow-md w-96">
+            <h2 class="text-2xl font-bold text-center mb-6 text-brand-dark">Manager Login</h2>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                    <input type="text" id="login-username" required class="w-full border border-slate-300 rounded px-3 py-2" placeholder="admin">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                    <input type="password" id="login-password" required class="w-full border border-slate-300 rounded px-3 py-2" placeholder="admin">
+                </div>
+                <button type="submit" class="w-full bg-brand-teal text-white py-2 rounded font-medium hover:bg-teal-600">Login</button>
+                <p id="login-error" class="text-red-500 text-sm mt-4 hidden text-center">Invalid credentials</p>
+                <div class="mt-4 text-center text-xs text-slate-500">
+                    <p>Demo Credentials:</p>
+                    <p>User: <strong>admin</strong> | Pass: <strong>admin</strong></p>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="dashboard-container">
-        <!-- Total Customers -->
-        <div class="card">
-            <h2>Total Customers</h2>
-            <div class="value" id="total-customers">-</div>
+    <!-- Dashboard Content Wrapper (Initially hidden) -->
+    <div id="dashboard-wrapper" class="hidden">
+    <nav class="bg-brand-dark text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <div class="flex items-center space-x-3">
+                <span class="font-bold text-2xl tracking-tight text-brand-teal">Pourify</span>
+            </div>
+            <span class="text-sm text-slate-300 font-semibold">Unified Dashboard</span>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 border-b border-slate-200">
+        <nav class="-mb-px flex space-x-8">
+            <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active border-b-2 font-medium text-sm py-4 px-1 border-brand-teal text-brand-teal">Overview</button>
+            <button onclick="switchTab('management')" id="tab-management" class="tab-btn border-b-2 font-medium text-sm py-4 px-1 border-transparent text-slate-500 hover:text-slate-700">Management Portal</button>
+        </nav>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Overview Tab -->
+        <div id="view-overview">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-brand-dark">Overview</h1>
+                <p class="text-slate-500 mt-1">Real-time metrics from field operations.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="metric-card border-t-4 border-t-brand-teal">
+                    <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">Total Customers</h2>
+                    <p id="total-customers" class="text-4xl font-bold text-brand-dark">0</p>
+                </div>
+                <div class="metric-card border-t-4 border-t-brand-blue">
+                    <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">Total Receivable</h2>
+                    <p class="text-4xl font-bold text-brand-dark">PKR <span id="total-receivable">0</span></p>
+                </div>
+                <div class="metric-card border-t-4 border-t-slate-800">
+                    <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">Today's Visits</h2>
+                    <div class="flex justify-between items-center">
+                        <div class="flex-1 text-center border-r border-slate-200">
+                            <p class="text-sm font-medium text-emerald-600 mb-1">VERIFIED</p>
+                            <p id="verified-visits" class="text-3xl font-bold text-brand-dark">0</p>
+                        </div>
+                        <div class="flex-1 text-center">
+                            <p class="text-sm font-medium text-amber-500 mb-1">UNVERIFIED</p>
+                            <p id="unverified-visits" class="text-3xl font-bold text-brand-dark">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                <h3 class="text-xl font-bold text-brand-dark mb-4">Live Agent Map</h3>
+                <div class="relative w-full h-96 bg-slate-200 rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Paris_map.svg/1024px-Paris_map.svg.png" alt="Map Placeholder" class="absolute inset-0 w-full h-full object-cover opacity-50 grayscale" />
+                    <div class="absolute inset-0 bg-brand-dark bg-opacity-10"></div>
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-4 py-2 rounded-full shadow-lg text-sm font-bold text-brand-teal flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-teal animate-ping"></span>
+                        Live tracking active
+                    </div>
+                    <!-- Sample Markers -->
+                    <div class="absolute top-1/4 left-1/3 bg-brand-blue text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md font-bold text-xs">1</div>
+                    <div class="absolute top-1/3 right-1/4 bg-brand-teal text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md font-bold text-xs">2</div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Total Receivable Balance -->
-        <div class="card revenue">
-            <h2>Receivable Balance</h2>
-            <div class="value" id="total-receivable">-</div>
-        </div>
+        <!-- Management Portal Tab -->
+        <div id="view-management" class="hidden space-y-10">
+            
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Add Agent Form -->
+                <div class="w-full md:w-1/3">
+                    <div class="bg-white p-6 rounded-lg shadow border border-slate-200">
+                        <h3 class="text-xl font-bold text-brand-dark mb-4">Add Field Agent</h3>
+                        <form id="add-agent-form" onsubmit="createAgent(event)">
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Agent Username</label>
+                                <input type="text" id="agent-username" required class="w-full border border-slate-300 rounded px-3 py-2" placeholder="e.g. driver_ahmed">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                                <input type="password" id="agent-password" required class="w-full border border-slate-300 rounded px-3 py-2" placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="w-full bg-brand-teal text-white py-2 rounded font-medium hover:bg-teal-600">Create Agent</button>
+                        </form>
+                    </div>
+                </div>
 
-        <!-- Today's Visits -->
-        <div class="card visits">
-            <h2>Today's Visits</h2>
-            <div class="value" id="total-visits">-</div>
-            <div class="visit-breakdown">
-                <div><span class="verified" id="verified-visits">-</span> Verified</div>
-                <div><span class="unverified" id="unverified-visits">-</span> Unverified</div>
+                <!-- Agent Activity Table -->
+                <div class="w-full md:w-2/3">
+                    <div class="bg-white rounded-lg shadow overflow-hidden border border-slate-200 h-full">
+                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-brand-dark">Agent Activity (Today)</h3>
+                            <button onclick="loadAgents()" class="text-sm text-brand-blue hover:underline">Refresh</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-slate-200">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Agent Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Deliveries</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Cash Collected</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="agents-table-body" class="bg-white divide-y divide-slate-200">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                <h3 class="text-xl font-bold text-brand-dark mb-4">Live Agent Map</h3>
+                <div class="relative w-full h-96 bg-slate-200 rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Paris_map.svg/1024px-Paris_map.svg.png" alt="Map Placeholder" class="absolute inset-0 w-full h-full object-cover opacity-50 grayscale" />
+                    <div class="absolute inset-0 bg-brand-dark bg-opacity-10"></div>
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-4 py-2 rounded-full shadow-lg text-sm font-bold text-brand-teal flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-teal animate-ping"></span>
+                        Live tracking active
+                    </div>
+                    <!-- Sample Markers -->
+                    <div class="absolute top-1/4 left-1/3 bg-brand-blue text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md font-bold text-xs">1</div>
+                    <div class="absolute top-1/3 right-1/4 bg-brand-teal text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md font-bold text-xs">2</div>
+                </div>
+            </div>
+
+
+            <!-- Customer Balances & Invoicing -->
+
+            <!-- Create Customer -->
+            <div class="bg-white rounded-lg shadow border border-slate-200 mb-8 p-6">
+                <h3 class="text-lg font-bold text-brand-dark mb-4">Add New Customer</h3>
+                <form id="add-customer-form" onsubmit="createCustomer(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Business Name</label>
+                        <input type="text" id="cust-name" required class="w-full border border-slate-300 rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+                        <input type="text" id="cust-phone" required class="w-full border border-slate-300 rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Starting Balance</label>
+                        <input type="number" id="cust-balance" value="0" class="w-full border border-slate-300 rounded px-3 py-2">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-brand-blue text-white py-2 rounded font-medium hover:bg-blue-600">Create Customer</button>
+                    </div>
+                </form>
+            </div>
+            
+
+            <div>
+                <div class="bg-white rounded-lg shadow overflow-hidden border border-slate-200">
+                    <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-brand-dark">Outstanding Customer Balances</h3>
+                        <button onclick="loadCustomers()" class="text-sm text-brand-blue hover:underline">Refresh</button>
+                    </div>
+                    <div class="overflow-x-auto max-h-96">
+                        <table class="min-w-full divide-y divide-slate-200">
+                            <thead class="bg-slate-50 sticky top-0 shadow-sm">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Business Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Phone</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Balance Receivable</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customers-table-body" class="bg-white divide-y divide-slate-200">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    </div> <!-- End Dashboard Wrapper -->
+    <!-- Invoice Modal -->
+    <div id="modal-invoice" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold">Combined Invoice</h3>
+                <button onclick="document.getElementById('modal-invoice').classList.add('hidden')" class="text-slate-500 hover:text-slate-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div id="invoice-content" class="bg-slate-50 p-6 border border-slate-200 rounded font-mono text-sm whitespace-pre-wrap overflow-y-auto flex-1">
+                <!-- Generated Invoice HTML goes here -->
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button onclick="printInvoice()" class="px-6 py-2 bg-brand-blue text-white rounded font-medium hover:bg-blue-600">Print Invoice</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Dummy tenant id for demonstration
-        const tenantId = 'b1234567-89ab-cdef-0123-456789abcdef';
         
-        async function fetchSummary() {
+        let tenantId = ''; // No longer hardcoded
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            
             try {
-                const response = await fetch(`/api/v1/dashboard/summary?tenant_id=${tenantId}`);
-                const json = await response.json();
+                const res = await fetch('/api/v1/manager/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const json = await res.json();
                 
                 if (json.success) {
-                    const data = json.data;
-                    document.getElementById('total-customers').innerText = data.total_customers.toLocaleString();
-                    document.getElementById('total-receivable').innerText = 'PKR ' + data.total_receivable.toLocaleString();
+                    tenantId = json.tenant_id;
+                    errorEl.classList.add('hidden');
                     
-                    const totalVisits = data.verified_visits + data.unverified_visits;
-                    document.getElementById('total-visits').innerText = totalVisits.toLocaleString();
-                    document.getElementById('verified-visits').innerText = data.verified_visits.toLocaleString();
-                    document.getElementById('unverified-visits').innerText = data.unverified_visits.toLocaleString();
+                    // Hide login, show dashboard
+                    document.getElementById('view-login').classList.add('hidden');
+                    document.getElementById('dashboard-wrapper').classList.remove('hidden');
+                    
+                    // Init dashboard data
+                    switchTab('overview');
                 } else {
-                    console.error("Error fetching summary:", json.error);
+                    errorEl.classList.remove('hidden');
                 }
             } catch (err) {
-                console.error("Fetch error:", err);
+                console.error(err);
+                errorEl.textContent = 'Server error';
+                errorEl.classList.remove('hidden');
             }
         }
 
-        // Fetch initially and then set an interval to refresh
-        fetchSummary();
-        setInterval(fetchSummary, 60000); // refresh every minute
+        
+        function switchTab(tab) {
+            document.getElementById('view-overview').classList.add('hidden');
+            document.getElementById('view-management').classList.add('hidden');
+            document.getElementById('tab-overview').className = "tab-btn border-b-2 font-medium text-sm py-4 px-1 border-transparent text-slate-500 hover:text-slate-700";
+            document.getElementById('tab-management').className = "tab-btn border-b-2 font-medium text-sm py-4 px-1 border-transparent text-slate-500 hover:text-slate-700";
+            
+            document.getElementById('view-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).className = "tab-btn active border-b-2 font-medium text-sm py-4 px-1 border-brand-teal text-brand-teal";
+            
+            if(tab === 'overview') fetchSummary();
+            if(tab === 'management') { loadAgents(); loadCustomers(); }
+        }
+
+        async function fetchSummary() {
+            try {
+                const res = await fetch(`/api/v1/dashboard/summary?tenant_id=${tenantId}`);
+                const json = await res.json();
+                if (json.success) {
+                    document.getElementById('total-customers').innerText = json.data.total_customers.toLocaleString();
+                    document.getElementById('total-receivable').innerText = json.data.total_receivable.toLocaleString(undefined, {minimumFractionDigits: 2});
+                    document.getElementById('verified-visits').innerText = json.data.verified_visits.toLocaleString();
+                    document.getElementById('unverified-visits').innerText = json.data.unverified_visits.toLocaleString();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadAgents() {
+            try {
+                const res = await fetch(`/api/v1/manager/agents?tenant_id=${tenantId}`);
+                const json = await res.json();
+                if (json.success) {
+                    const tbody = document.getElementById('agents-table-body');
+                    tbody.innerHTML = '';
+                    if(json.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-sm text-slate-500">No agents found.</td></tr>';
+                    }
+                    json.data.forEach(agent => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-brand-dark">${agent.username}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">${agent.deliveries_today || 0}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">PKR ${parseFloat(agent.cash_collected_today || 0).toLocaleString()}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function createAgent(e) {
+            e.preventDefault();
+            const username = document.getElementById('agent-username').value;
+            const password = document.getElementById('agent-password').value; // Using this as hash for demo
+            
+            try {
+                const res = await fetch('/api/v1/manager/agents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tenant_id: tenantId, username, password_hash: password })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    document.getElementById('add-agent-form').reset();
+                    loadAgents();
+                } else {
+                    alert('Failed to create agent: ' + json.error);
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        
+        async function createCustomer(e) {
+            e.preventDefault();
+            const name = document.getElementById('cust-name').value;
+            const phone = document.getElementById('cust-phone').value;
+            const balance = document.getElementById('cust-balance').value;
+            try {
+                const res = await fetch('/api/v1/manager/customers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenant_id: tenantId,
+                        business_name: name,
+                        contact_phone: phone,
+                        balance_receivable: parseFloat(balance || 0),
+                        visit_status: 'SCHEDULED'
+                    })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    document.getElementById('add-customer-form').reset();
+                    loadCustomers();
+                } else {
+                    alert('Failed: ' + json.error);
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadCustomers() {
+            try {
+                const res = await fetch(`/api/v1/manager/customers?tenant_id=${tenantId}`);
+                const json = await res.json();
+                if (json.success) {
+                    const tbody = document.getElementById('customers-table-body');
+                    tbody.innerHTML = '';
+                    if(json.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-sm text-slate-500">No customers found.</td></tr>';
+                    }
+                    json.data.forEach(c => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-brand-dark">${c.business_name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${c.contact_phone || 'N/A'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${c.balance_receivable > 0 ? 'text-red-500' : 'text-slate-600'}">PKR ${parseFloat(c.balance_receivable || 0).toLocaleString()}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <button onclick="generateCombinedInvoice('${c.customer_id}', '${c.business_name.replace(/'/g, "\\'")}')" class="text-brand-blue font-medium hover:underline">Combined Invoice</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function generateCombinedInvoice(customerId, businessName) {
+            try {
+                const res = await fetch(`/api/v1/manager/customers/${customerId}/transactions?tenant_id=${tenantId}`);
+                const json = await res.json();
+                if (json.success) {
+                    let txs = json.data;
+                    let out = `=======================================\n`;
+                    out += `               POURIFY\n`;
+                    out += `      Combined Customer Invoice\n`;
+                    out += `=======================================\n\n`;
+                    out += `Date: ${new Date().toLocaleString()}\n`;
+                    out += `Client: ${businessName}\n`;
+                    out += `---------------------------------------\n\n`;
+                    
+                    let totalCharged = 0;
+                    let totalCollected = 0;
+                    let totalUnits = 0;
+                    
+                    if (txs.length === 0) {
+                        out += `  [ No transaction records found ]\n\n`;
+                    } else {
+                        out += `Transactions (Multiple Agents):\n`;
+                        txs.forEach(tx => {
+                            const dateStr = new Date(parseInt(tx.epoch_timestamp)).toLocaleString();
+                            out += `\n> Date: ${dateStr}\n`;
+                            out += `  Agent: ${tx.driver_name || 'N/A'}\n`;
+                            out += `  Type: ${tx.record_classification}\n`;
+                            if (tx.item_units_delivered > 0) out += `  Units Delivered: ${tx.item_units_delivered}\n`;
+                            if (tx.amount_charged > 0) out += `  Charged: PKR ${parseFloat(tx.amount_charged).toLocaleString()}\n`;
+                            if (tx.amount_collected > 0) out += `  Collected: PKR ${parseFloat(tx.amount_collected).toLocaleString()}\n`;
+                            
+                            totalCharged += parseFloat(tx.amount_charged || 0);
+                            totalCollected += parseFloat(tx.amount_collected || 0);
+                            totalUnits += parseInt(tx.item_units_delivered || 0);
+                        });
+                        out += `\n---------------------------------------\n`;
+                    }
+                    
+                    out += `\nCONSOLIDATED SUMMARY:\n`;
+                    out += `Total Units Delivered : ${totalUnits}\n`;
+                    out += `Total Amount Charged  : PKR ${totalCharged.toLocaleString()}\n`;
+                    out += `Total Amount Paid     : PKR ${totalCollected.toLocaleString()}\n`;
+                    out += `Net Balance Change    : PKR ${(totalCharged - totalCollected).toLocaleString()}\n`;
+                    
+                    out += `\n=======================================\n`;
+                    out += `      Thank you for your business!     \n`;
+                    out += `=======================================\n`;
+                    
+                    document.getElementById('invoice-content').innerText = out;
+                    document.getElementById('modal-invoice').classList.remove('hidden');
+                } else {
+                    alert('Failed to fetch transactions.');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function printInvoice() {
+            const content = document.getElementById('invoice-content').innerText;
+            const printWin = window.open('', '_blank');
+            printWin.document.write('<pre style="font-family: monospace; font-size: 14px; padding: 20px;">' + content + '</pre>');
+            printWin.document.close();
+            printWin.focus();
+            printWin.print();
+            printWin.close();
+        }
+
+        // Init
+        // fetchSummary(); // Replaced with logic inside switchTab
+        setInterval(() => {
+            if(tenantId && !document.getElementById('view-overview').classList.contains('hidden')) {
+                fetchSummary();
+            }
+        }, 60000);
     </script>
 </body>
 </html>

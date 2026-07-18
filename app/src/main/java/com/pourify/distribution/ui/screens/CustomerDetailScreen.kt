@@ -5,6 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -26,6 +28,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import androidx.compose.material.icons.filled.PinDrop
 import com.pourify.distribution.utils.WhatsAppDispatcher
+import com.pourify.distribution.data.DeliveryChallanEntity
 import com.pourify.distribution.utils.PdfHelper
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -59,6 +62,11 @@ fun CustomerDetailScreen(
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var locationText by remember { mutableStateOf("Lat: ${customer?.geoLatitude ?: 0.0}, Lng: ${customer?.geoLongitude ?: 0.0}") }
 
+    
+    val unpaidChallans by produceState<List<DeliveryChallanEntity>>(initialValue = emptyList(), customerId) {
+        value = viewModel.getUnpaidChallans(customerId)
+    }
+
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -89,7 +97,7 @@ fun CustomerDetailScreen(
             PourifyBottomNavBar(
                 currentRoute = "itinerary",
                 onNavigateToItinerary = { navController.navigate("itinerary") },
-                onNavigateToSync = { },
+                onNavigateToSync = { navController.navigate("reconciliation") },
                 onNavigateToSettings = { navController.navigate("profile") }
             )
         }
@@ -263,6 +271,34 @@ fun CustomerDetailScreen(
                     }
                 }
                 
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                Text("UNPAID CHALLANS", style = Typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                if (unpaidChallans.isEmpty()) {
+                    Text("No unpaid challans.", style = Typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    unpaidChallans.forEach { challan ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text("Challan: ${challan.id}", style = Typography.labelLarge)
+                                }
+                                Icon(imageVector = Icons.Filled.Receipt, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
                 Text("ACTIONS", style = Typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.height(8.dp))
