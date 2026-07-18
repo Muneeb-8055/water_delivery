@@ -1,0 +1,33 @@
+package com.example.data
+
+import kotlinx.coroutines.flow.Flow
+
+class AppRepository(
+    private val customerDao: CustomerDao,
+    private val inventoryDao: InventoryDao,
+    private val transactionDao: TransactionDao
+) {
+    val allCustomers: Flow<List<CustomerEntity>> = customerDao.getAllCustomers()
+    val allInventory: Flow<List<InventoryItemEntity>> = inventoryDao.getAllInventory()
+    val allTransactions: Flow<List<TransactionEntity>> = transactionDao.getAllTransactions()
+
+    suspend fun insertCustomers(customers: List<CustomerEntity>) {
+        customerDao.insertAll(customers)
+    }
+
+    suspend fun updateCustomer(customer: CustomerEntity) {
+        customerDao.updateCustomer(customer)
+    }
+
+    suspend fun getCustomerById(id: String): CustomerEntity? {
+        return customerDao.getCustomerById(id)
+    }
+
+    suspend fun insertInventory(items: List<InventoryItemEntity>) {
+        inventoryDao.insertAll(items)
+    }
+
+    suspend fun insertTransaction(transaction: TransactionEntity) {
+        transactionDao.insertTransaction(transaction)
+    }
+}

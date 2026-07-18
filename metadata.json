@@ -1,0 +1,6 @@
+{
+  "name": "Tarsil Field Systems",
+  "description": "Secure operations and real-time logistics tracking for field agents.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
